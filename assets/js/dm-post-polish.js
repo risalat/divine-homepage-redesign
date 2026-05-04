@@ -49,6 +49,45 @@
   if (!card || !modal || !stage) return;
 
   const urls = window.DMPostPolishData && window.DMPostPolishData.urls ? window.DMPostPolishData.urls : {};
+  const analytics = window.DMPostPolishData && window.DMPostPolishData.analytics ? window.DMPostPolishData.analytics : {};
+
+  function trackSoulQuizEvent(eventName) {
+    if (!analytics.enabled || !analytics.ajaxUrl || !analytics.nonce || !eventName) return;
+    try {
+      var formData = new FormData();
+      formData.append('action', 'dmhr_track_soul_quiz');
+      formData.append('nonce', analytics.nonce);
+      formData.append('event', eventName);
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(analytics.ajaxUrl, formData);
+      } else {
+        fetch(analytics.ajaxUrl, { method: 'POST', body: formData, keepalive: true });
+      }
+    } catch (e) {
+      // Silent failure
+    }
+  }
+
+  var cardSeenTracked = false;
+  if (card && typeof IntersectionObserver !== 'undefined') {
+    var cardObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting && !cardSeenTracked) {
+          cardSeenTracked = true;
+          trackSoulQuizEvent('quiz_card_seen');
+          cardObserver.disconnect();
+        }
+      });
+    }, { threshold: 0.35 });
+    cardObserver.observe(card);
+  } else if (card) {
+    setTimeout(function () {
+      if (!cardSeenTracked) {
+        cardSeenTracked = true;
+        trackSoulQuizEvent('quiz_card_seen');
+      }
+    }, 1200);
+  }
 
   const quizData = {
     title: 'What Message Is the Universe Sending You Right Now?',
@@ -211,6 +250,7 @@
       + '<button type="button" class="dm-soul-quiz-card__button" data-dm-soul-quiz-start>Start the Quiz <span aria-hidden="true">→</span></button>'
       + '</div>';
     stage.querySelector('[data-dm-soul-quiz-start]').addEventListener('click', function () {
+      trackSoulQuizEvent('quiz_started');
       resetQuiz();
       renderQuestion();
     });
@@ -272,6 +312,10 @@
     const key = calculateResult();
     const r = quizData.results[key];
     const meta = resultMeta[key] || { icon: '✦', chip: 'Clarity' };
+
+    trackSoulQuizEvent('quiz_completed');
+    trackSoulQuizEvent('result_' + key);
+
     const html = '<div class="dm-soul-quiz-result dm-soul-quiz-result--' + key + '">'
       + '<div class="dm-soul-quiz-result-orb" aria-hidden="true"><span>' + meta.icon + '</span></div>'
       + '<span class="dm-soul-quiz-result-label">Your Soul Signal</span>'
@@ -290,11 +334,27 @@
       + '</div>';
     stage.innerHTML = html;
 
+    var primaryCta = stage.querySelector('.dm-soul-quiz-result-primary');
+    if (primaryCta) {
+      primaryCta.addEventListener('click', function () {
+        trackSoulQuizEvent('primary_cta_clicked');
+      });
+    }
+    var secondaryCta = stage.querySelector('.dm-soul-quiz-result-secondary');
+    if (secondaryCta) {
+      secondaryCta.addEventListener('click', function () {
+        trackSoulQuizEvent('secondary_cta_clicked');
+      });
+    }
     stage.querySelector('[data-dm-soul-quiz-retake]').addEventListener('click', function () {
+      trackSoulQuizEvent('retake_clicked');
       resetQuiz();
       renderIntro();
     });
-    stage.querySelector('[data-dm-soul-quiz-continue]').addEventListener('click', closeModal);
+    stage.querySelector('[data-dm-soul-quiz-continue]').addEventListener('click', function () {
+      trackSoulQuizEvent('continue_reading_clicked');
+      closeModal();
+    });
   }
 
   card.querySelector('[data-dm-soul-quiz-open]').addEventListener('click', openModal);

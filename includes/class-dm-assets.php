@@ -69,6 +69,11 @@ class DM_Assets {
             wp_script_add_data('dm-post-polish', 'defer', true);
             wp_localize_script('dm-post-polish', 'DMPostPolishData', [
                 'urls' => DM_Utils::get_urls(),
+                'analytics' => [
+                    'ajaxUrl' => admin_url('admin-ajax.php'),
+                    'nonce'   => wp_create_nonce('dmhr_soul_quiz_analytics'),
+                    'enabled' => DM_Utils::soul_quiz_enabled(),
+                ],
             ]);
         }
     }
