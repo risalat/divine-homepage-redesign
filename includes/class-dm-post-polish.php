@@ -273,15 +273,16 @@ class DM_Post_Polish {
         $variant = $variants[$variant_index] ?? 'portal';
 
         $visuals = [
-            'portal' => '<div class="dm-soul-portal-ring"></div><div class="dm-soul-portal-moon"></div><div class="dm-soul-portal-stars"></div>',
-            'path'   => '<div class="dm-soul-path-map"><div class="dm-soul-path-node" data-label="Clarity">☾</div><div class="dm-soul-path-node" data-label="Love">♡</div><div class="dm-soul-path-node" data-label="Purpose">⚿</div><div class="dm-soul-path-node" data-label="Protection">◈</div><div class="dm-soul-path-node" data-label="Transformation">✦</div></div>',
-            'message' => '<div class="dm-soul-envelope"><div class="dm-soul-envelope-flap"></div><div class="dm-soul-cards-stack"><span></span><span></span><span></span></div><div class="dm-soul-wax-seal">☾</div></div>',
+            'portal' => '<div class="dm-soul-portal"><div class="dm-soul-portal__orbits"></div><div class="dm-soul-portal__ring"></div><div class="dm-soul-portal__inner"><span class="dm-soul-portal__moon">☾</span><span class="dm-soul-portal__horizon"></span></div><span class="dm-soul-portal__spark dm-soul-portal__spark--one">✦</span><span class="dm-soul-portal__spark dm-soul-portal__spark--two">✧</span><span class="dm-soul-portal__spark dm-soul-portal__spark--three">✦</span></div>',
+            'path'   => '<div class="dm-soul-path-map"><div class="dm-soul-path-map__orbit"></div><div class="dm-soul-path-map__line dm-soul-path-map__line--one"></div><div class="dm-soul-path-map__line dm-soul-path-map__line--two"></div><div class="dm-soul-path-node dm-soul-path-node--clarity" data-label="Clarity"><span>☾</span></div><div class="dm-soul-path-node dm-soul-path-node--love" data-label="Love"><span>♡</span></div><div class="dm-soul-path-node dm-soul-path-node--purpose" data-label="Purpose"><span>⚿</span></div><div class="dm-soul-path-node dm-soul-path-node--protection" data-label="Protection"><span>◈</span></div><div class="dm-soul-path-node dm-soul-path-node--transformation" data-label="Transformation"><span>✦</span></div></div>',
+            'message' => '<div class="dm-soul-message-visual"><div class="dm-soul-message-glow"></div><div class="dm-soul-envelope"><div class="dm-soul-envelope__back"></div><div class="dm-soul-cards-stack"><span class="dm-soul-card dm-soul-card--one"><i>A message<br>meant for<br>you</i></span><span class="dm-soul-card dm-soul-card--two"></span><span class="dm-soul-card dm-soul-card--three"></span></div><div class="dm-soul-envelope__front"></div><div class="dm-soul-wax-seal">✦</div></div></div>',
         ];
 
         return '<section class="dm-soul-quiz-card dm-soul-quiz-card--' . esc_attr($variant) . '" data-dm-soul-quiz-card>'
             . '<div class="dm-soul-quiz-card__inner">'
             . '<div class="dm-soul-quiz-card__copy">'
             . '<p class="dm-soul-quiz-card__eyebrow">Soul Signal Quiz</p>'
+            . '<p class="dm-soul-quiz-card__brand">DivineMarkings.com</p>'
             . '<h2>What Message Is the Universe Sending You Right Now?</h2>'
             . '<p>Take the 60-second Soul Signal Quiz and reveal whether this sign points to clarity, love, purpose, protection, or transformation.</p>'
             . '<button type="button" class="dm-soul-quiz-card__button" data-dm-soul-quiz-open>'
