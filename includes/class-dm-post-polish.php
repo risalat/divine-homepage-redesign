@@ -284,7 +284,8 @@ class DM_Post_Polish {
     }
 
     private function get_soul_quiz_card_html(int $post_id): string {
-        $variant_index = ((int) $post_id % 3) + 1;
+        // Temporarily locked to Portal variant only. Reactivate later by restoring: $variant_index = ((int) $post_id % 3) + 1;
+        $variant_index = 1;
         $variants = [
             1 => 'portal',
             2 => 'path',
@@ -302,7 +303,6 @@ class DM_Post_Polish {
             . '<div class="dm-soul-quiz-card__inner">'
             . '<div class="dm-soul-quiz-card__copy">'
             . '<p class="dm-soul-quiz-card__eyebrow">Soul Signal Quiz</p>'
-            . '<p class="dm-soul-quiz-card__brand">DivineMarkings.com</p>'
             . '<h2>What Message Is the Universe Sending You Right Now?</h2>'
             . '<p>Take the 60-second Soul Signal Quiz and reveal whether this sign points to clarity, love, purpose, protection, or transformation.</p>'
             . '<button type="button" class="dm-soul-quiz-card__button" data-dm-soul-quiz-open>'
