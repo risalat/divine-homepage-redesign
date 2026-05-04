@@ -63,6 +63,13 @@ class DM_Utils {
         return '<div class="dm-convertkit-fallback"><p>Get weekly spiritual insights, meaning guides, and new readings delivered to your inbox.</p>' . $admin_note . '</div>';
     }
 
+    public static function post_polish_enabled(): bool {
+        if (defined('DMHR_ENABLE_POST_POLISH') && DMHR_ENABLE_POST_POLISH) {
+            return true;
+        }
+        return (bool) get_option('dmhr_enable_post_polish', false);
+    }
+
     public static function render_primary_navigation(array $urls): string {
         $menu_html = '';
         $menu_id = 0;

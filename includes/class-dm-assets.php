@@ -18,7 +18,7 @@ class DM_Assets {
     }
 
     private function is_single_post_polish(): bool {
-        return defined('DMHR_ENABLE_POST_POLISH') && DMHR_ENABLE_POST_POLISH && !is_admin() && is_singular('post') && get_post_type() === 'post';
+        return DM_Utils::post_polish_enabled() && !is_admin() && is_singular('post') && get_post_type() === 'post';
     }
 
     private function any_feature_active(): bool {
