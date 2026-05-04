@@ -149,6 +149,14 @@
     },
   };
 
+  const resultMeta = {
+    clarity:       { icon: '✦', chip: 'Clarity' },
+    love:          { icon: '♡', chip: 'Love' },
+    purpose:       { icon: '☼', chip: 'Purpose' },
+    protection:    { icon: '◈', chip: 'Protection' },
+    transformation:{ icon: '✧', chip: 'Transformation' },
+  };
+
   let currentQuestion = 0;
   let answers = [];
   let lastFocused = null;
@@ -229,10 +237,16 @@
     stage.innerHTML = html;
 
     const answerButtons = stage.querySelectorAll('.dm-soul-quiz-answer');
+    const questionEl = stage.querySelector('.dm-soul-quiz-question');
     answerButtons.forEach(function (btn) {
       btn.addEventListener('click', function () {
-        answerButtons.forEach(function (b) { b.classList.remove('is-selected'); });
+        if (btn.disabled) return;
+        answerButtons.forEach(function (b) {
+          b.disabled = true;
+          b.classList.remove('is-selected');
+        });
         btn.classList.add('is-selected');
+        if (questionEl) questionEl.classList.add('is-advancing');
         const result = btn.getAttribute('data-result');
         answers[currentQuestion] = result;
         setTimeout(function () {
@@ -242,7 +256,7 @@
           } else {
             renderResult();
           }
-        }, 180);
+        }, 650);
       });
     });
 
@@ -257,13 +271,17 @@
   function renderResult() {
     const key = calculateResult();
     const r = quizData.results[key];
-    const html = '<div class="dm-soul-quiz-result">'
+    const meta = resultMeta[key] || { icon: '✦', chip: 'Clarity' };
+    const html = '<div class="dm-soul-quiz-result dm-soul-quiz-result--' + key + '">'
+      + '<div class="dm-soul-quiz-result-orb" aria-hidden="true"><span>' + meta.icon + '</span></div>'
       + '<span class="dm-soul-quiz-result-label">Your Soul Signal</span>'
+      + '<span class="dm-soul-quiz-result-chip">' + meta.chip + '</span>'
       + '<h2>' + r.title + '</h2>'
       + '<p>' + r.text + '</p>'
+      + '<p class="dm-soul-quiz-result-next">Recommended next step</p>'
       + '<div class="dm-soul-quiz-result-actions">'
-      + '<a href="' + r.primaryUrl + '">' + r.primaryCta + '</a>'
-      + '<a href="' + r.secondaryUrl + '">' + r.secondaryCta + '</a>'
+      + '<a class="dm-soul-quiz-result-primary" href="' + r.primaryUrl + '">' + r.primaryCta + '</a>'
+      + '<a class="dm-soul-quiz-result-secondary" href="' + r.secondaryUrl + '">' + r.secondaryCta + '</a>'
       + '</div>'
       + '<div class="dm-soul-quiz-result-buttons">'
       + '<button type="button" data-dm-soul-quiz-retake="1">Retake Quiz</button>'
