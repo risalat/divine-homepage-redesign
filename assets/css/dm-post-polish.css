@@ -8,6 +8,7 @@ body.dm-single-post-polish {
   overflow-x: hidden;
 }
 
+/* Hide theme native header elements */
 body.dm-single-post-polish .entry-header,
 body.dm-single-post-polish header.entry-header,
 body.dm-single-post-polish .page-header,
@@ -17,6 +18,33 @@ body.dm-single-post-polish .post-thumbnail {
   display: none !important;
 }
 
+/* Hide theme native sidebars (custom sidebar is protected by different class names) */
+body.dm-single-post-polish #secondary,
+body.dm-single-post-polish .secondary,
+body.dm-single-post-polish aside.sidebar,
+body.dm-single-post-polish .sidebar-main,
+body.dm-single-post-polish .widget-area,
+body.dm-single-post-polish .kadence-sidebar,
+body.dm-single-post-polish .primary-sidebar,
+body.dm-single-post-polish .content-sidebar {
+  display: none !important;
+}
+
+/* Free entry-content from theme width constraints */
+body.dm-single-post-polish .entry-content {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+/* Center any stray direct children that are not our shell */
+body.dm-single-post-polish .entry-content > :not(.dm-post-reading-shell) {
+  box-sizing: border-box;
+  max-width: min(1180px, calc(100vw - 32px));
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Typography */
 body.dm-single-post-polish .entry-title,
 body.dm-single-post-polish h1.entry-title { color: #4B0082 !important; letter-spacing: -.025em; line-height: 1.08; max-width: 1050px; margin-left: auto; margin-right: auto; }
 body.dm-single-post-polish .entry-meta,
@@ -38,6 +66,33 @@ body.dm-single-post-polish .entry-content td,
 body.dm-single-post-polish .entry-content th { padding: 14px 16px; border-color: rgba(75,0,130,.10); }
 body.dm-single-post-polish .dm-key-takeaway-box { background: linear-gradient(135deg, #fff8e4, #fffaf4); border: 1px solid rgba(215,183,64,.55); border-radius: 18px; padding: 22px 24px; box-shadow: 0 14px 34px rgba(75,0,130,.07); }
 body.dm-single-post-polish .dm-key-takeaway-box strong:first-child { color: #4B0082; }
+
+/* Text overflow prevention */
+body.dm-single-post-polish .dm-post-reading-main {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+body.dm-single-post-polish .dm-post-reading-main > * {
+  max-width: 100%;
+}
+
+body.dm-single-post-polish .entry-content h1,
+body.dm-single-post-polish .entry-content h2,
+body.dm-single-post-polish .entry-content h3,
+body.dm-single-post-polish .entry-content h4,
+body.dm-single-post-polish .entry-content h5,
+body.dm-single-post-polish .entry-content h6,
+body.dm-single-post-polish .entry-content p,
+body.dm-single-post-polish .entry-content li,
+body.dm-single-post-polish .entry-content td,
+body.dm-single-post-polish .entry-content th,
+body.dm-single-post-polish .entry-content blockquote {
+  overflow-wrap: break-word;
+  word-break: normal;
+}
 
 /* === Post hero === */
 .dm-post-hero,
@@ -125,13 +180,6 @@ body.dm-single-post-polish .dm-key-takeaway-box strong:first-child { color: #4B0
 }
 
 /* === Post reading shell (two-column layout) === */
-body.dm-single-post-polish .entry-content > :not(.dm-post-reading-shell) {
-  box-sizing: border-box;
-  max-width: min(1180px, calc(100vw - 32px));
-  margin-left: auto;
-  margin-right: auto;
-}
-
 body.dm-single-post-polish .dm-post-reading-shell,
 body.dm-single-post-polish .dm-post-reading-shell *,
 body.dm-single-post-polish .dm-post-reading-shell *::before,
@@ -150,18 +198,6 @@ body.dm-single-post-polish .dm-post-reading-shell {
   align-items: start;
 }
 
-body.dm-single-post-polish .dm-post-reading-main {
-  width: 100%;
-  min-width: 0;
-  max-width: 820px;
-  margin: 0;
-  padding: 0;
-}
-
-body.dm-single-post-polish .dm-post-reading-main > * {
-  max-width: 100%;
-}
-
 body.dm-single-post-polish .dm-post-reading-sidebar {
   display: block;
   width: 100%;
@@ -176,14 +212,10 @@ body.dm-single-post-polish .dm-post-sidebar-stack {
   gap: 18px;
   width: 100%;
   max-width: 320px;
-  position: static;
 }
 
 body.dm-single-post-polish .dm-post-toc-card,
-body.dm-single-post-polish .dm-post-side-card,
-body.dm-single-post-polish .dm-post-sidebar-stack .dm-post-toc-card {
-  position: static;
-  top: auto;
+body.dm-single-post-polish .dm-post-side-card {
   width: 100%;
   max-width: 100%;
   background: linear-gradient(180deg, #ffffff 0%, #fbf6ff 100%);
@@ -195,7 +227,6 @@ body.dm-single-post-polish .dm-post-sidebar-stack .dm-post-toc-card {
 body.dm-single-post-polish .dm-post-toc {
   display: grid;
   gap: 8px;
-  max-height: none;
   padding-right: 0;
 }
 
@@ -252,10 +283,6 @@ body.dm-single-post-polish .dm-post-sidebar-source {
 .dm-post-related-card em { display: block; padding: 10px 16px 18px; color: #6d5a75; font-size: 14px; line-height: 1.5; font-style: normal; }
 
 /* === Responsive === */
-@media (min-width: 1025px) {
-  body.dm-single-post-polish .dm-post-sidebar-stack .dm-post-toc-card { position: sticky; top: 92px; }
-}
-
 @media (max-width: 1024px) {
   body.dm-single-post-polish .dm-post-reading-shell {
     display: block;
