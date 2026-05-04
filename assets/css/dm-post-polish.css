@@ -69,29 +69,37 @@ body.dm-single-post-polish .dm-key-takeaway-box strong:first-child { color: #4B0
 
 /* Text overflow prevention */
 body.dm-single-post-polish .dm-post-reading-main {
+  width: 100%;
+  max-width: 820px;
   min-width: 0;
+  overflow: hidden;
+}
+
+body.dm-single-post-polish .dm-post-reading-main > *,
+body.dm-single-post-polish .dm-post-reading-main .entry-content > *,
+body.dm-single-post-polish .dm-post-reading-main p,
+body.dm-single-post-polish .dm-post-reading-main h1,
+body.dm-single-post-polish .dm-post-reading-main h2,
+body.dm-single-post-polish .dm-post-reading-main h3,
+body.dm-single-post-polish .dm-post-reading-main h4,
+body.dm-single-post-polish .dm-post-reading-main ul,
+body.dm-single-post-polish .dm-post-reading-main ol,
+body.dm-single-post-polish .dm-post-reading-main li,
+body.dm-single-post-polish .dm-post-reading-main blockquote {
   max-width: 100%;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
   word-break: normal;
 }
 
-body.dm-single-post-polish .dm-post-reading-main > * {
+body.dm-single-post-polish .dm-post-reading-main img,
+body.dm-single-post-polish .dm-post-reading-main iframe,
+body.dm-single-post-polish .dm-post-reading-main table {
   max-width: 100%;
 }
 
-body.dm-single-post-polish .entry-content h1,
-body.dm-single-post-polish .entry-content h2,
-body.dm-single-post-polish .entry-content h3,
-body.dm-single-post-polish .entry-content h4,
-body.dm-single-post-polish .entry-content h5,
-body.dm-single-post-polish .entry-content h6,
-body.dm-single-post-polish .entry-content p,
-body.dm-single-post-polish .entry-content li,
-body.dm-single-post-polish .entry-content td,
-body.dm-single-post-polish .entry-content th,
-body.dm-single-post-polish .entry-content blockquote {
-  overflow-wrap: break-word;
-  word-break: normal;
+body.dm-single-post-polish .dm-post-reading-main table {
+  display: block;
+  overflow-x: auto;
 }
 
 /* === Post hero === */
