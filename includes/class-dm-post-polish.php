@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) {
 
 class DM_Post_Polish {
     public function __construct() {
-        if (!defined('DMHR_ENABLE_POST_POLISH') || !DMHR_ENABLE_POST_POLISH) {
+        if (!DM_Utils::post_polish_enabled()) {
             return;
         }
 
