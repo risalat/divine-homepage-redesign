@@ -263,6 +263,93 @@ class DM_Post_Polish {
         return (string) ob_get_clean();
     }
 
+    private function get_soul_quiz_card_html(int $post_id): string {
+        $variant_index = ((int) $post_id % 3) + 1;
+        $variants = [
+            1 => 'portal',
+            2 => 'path',
+            3 => 'message',
+        ];
+        $variant = $variants[$variant_index] ?? 'portal';
+
+        $visuals = [
+            'portal' => '<div class="dm-soul-portal-ring"></div><div class="dm-soul-portal-moon"></div><div class="dm-soul-portal-stars"></div>',
+            'path'   => '<div class="dm-soul-path-map"><div class="dm-soul-path-node" data-label="Clarity">☾</div><div class="dm-soul-path-node" data-label="Love">♡</div><div class="dm-soul-path-node" data-label="Purpose">⚿</div><div class="dm-soul-path-node" data-label="Protection">◈</div><div class="dm-soul-path-node" data-label="Transformation">✦</div></div>',
+            'message' => '<div class="dm-soul-envelope"><div class="dm-soul-envelope-flap"></div><div class="dm-soul-cards-stack"><span></span><span></span><span></span></div><div class="dm-soul-wax-seal">☾</div></div>',
+        ];
+
+        return '<section class="dm-soul-quiz-card dm-soul-quiz-card--' . esc_attr($variant) . '" data-dm-soul-quiz-card>'
+            . '<div class="dm-soul-quiz-card__inner">'
+            . '<div class="dm-soul-quiz-card__copy">'
+            . '<p class="dm-soul-quiz-card__eyebrow">Soul Signal Quiz</p>'
+            . '<h2>What Message Is the Universe Sending You Right Now?</h2>'
+            . '<p>Take the 60-second Soul Signal Quiz and reveal whether this sign points to clarity, love, purpose, protection, or transformation.</p>'
+            . '<button type="button" class="dm-soul-quiz-card__button" data-dm-soul-quiz-open>'
+            . 'Start the Quiz <span aria-hidden="true">→</span>'
+            . '</button>'
+            . '<div class="dm-soul-quiz-card__trust">'
+            . '<span>No sign-up</span>'
+            . '<span>5 quick questions</span>'
+            . '<span>Stay on this page</span>'
+            . '</div>'
+            . '</div>'
+            . '<div class="dm-soul-quiz-card__visual" aria-hidden="true">'
+            . $visuals[$variant]
+            . '</div>'
+            . '</div>'
+            . '<div class="dm-soul-quiz-card__chips" aria-hidden="true">'
+            . '<span>Clarity</span><span>Love</span><span>Purpose</span><span>Protection</span><span>Transformation</span>'
+            . '</div>'
+            . '</section>';
+    }
+
+    private function get_soul_quiz_modal_html(): string {
+        if (strpos($GLOBALS['dm_soul_quiz_modal_rendered'] ?? '', 'yes') !== false) {
+            return '';
+        }
+        $GLOBALS['dm_soul_quiz_modal_rendered'] = 'yes';
+
+        return '<div class="dm-soul-quiz-modal" data-dm-soul-quiz-modal hidden>'
+            . '<div class="dm-soul-quiz-modal__backdrop" data-dm-soul-quiz-close></div>'
+            . '<div class="dm-soul-quiz-dialog" role="dialog" aria-modal="true" aria-labelledby="dm-soul-quiz-title">'
+            . '<button type="button" class="dm-soul-quiz-close" data-dm-soul-quiz-close aria-label="Close quiz">×</button>'
+            . '<div class="dm-soul-quiz-stage" data-dm-soul-quiz-stage></div>'
+            . '</div>'
+            . '</div>';
+    }
+
+    private function inject_soul_quiz_card(string $content, int $post_id): string {
+        if (!DM_Utils::soul_quiz_enabled()) {
+            return $content;
+        }
+        if (strpos($content, 'dm-soul-quiz-card') !== false) {
+            return $content;
+        }
+
+        $card = $this->get_soul_quiz_card_html($post_id);
+
+        $h2s = preg_split('/(<\/h2>)/i', $content, -1, PREG_SPLIT_DELIM_CAPTURE);
+        if (count($h2s) >= 7) {
+            array_splice($h2s, 6, 0, [$card]);
+            return implode('', $h2s);
+        }
+        if (count($h2s) >= 5) {
+            array_splice($h2s, 4, 0, [$card]);
+            return implode('', $h2s);
+        }
+
+        $paragraphs = explode('</p>', $content);
+        $count = count($paragraphs);
+        if ($count > 6) {
+            array_splice($paragraphs, 6, 0, [$card]);
+        } elseif ($count > 4) {
+            array_splice($paragraphs, 4, 0, [$card]);
+        } else {
+            return $content . $card;
+        }
+        return implode('</p>', $paragraphs);
+    }
+
     public function filter_single_post_content(string $content): string {
         static $is_filtering = false;
 
@@ -275,6 +362,7 @@ class DM_Post_Polish {
         $post_id = get_the_ID();
 
         $content_with_inline_cta = $this->inject_inline_tool_cta($content, (int) $post_id);
+        $content_with_quiz = $this->inject_soul_quiz_card($content_with_inline_cta, (int) $post_id);
 
         $continue = '<section class="dm-post-continue" aria-labelledby="dm-post-continue-title">'
             . '<div><p class="dm-post-side-kicker">Your reading does not have to end here</p>'
@@ -287,11 +375,12 @@ class DM_Post_Polish {
             . '<a href="' . esc_url($urls['daily_horoscope']) . '"><span>☾</span><strong>Daily Horoscope</strong><em>Read today’s zodiac forecast.</em></a>'
             . '</div></section>';
 
-        $main_content = $content_with_inline_cta . $continue . $this->get_related_posts_html((int) $post_id);
+        $main_content = $content_with_quiz . $continue . $this->get_related_posts_html((int) $post_id);
         $enhanced_content = '<div class="dm-post-reading-shell">'
             . '<div class="dm-post-reading-main">' . $main_content . '</div>'
             . $this->get_post_sidebar_html()
-            . '</div>';
+            . '</div>'
+            . $this->get_soul_quiz_modal_html();
         $is_filtering = false;
 
         return $enhanced_content;

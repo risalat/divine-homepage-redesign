@@ -67,6 +67,9 @@ class DM_Assets {
             wp_enqueue_style('dm-post-polish', $base_url . 'css/dm-post-polish.css', ['dm-core'], DMHR_VERSION);
             wp_enqueue_script('dm-post-polish', $base_url . 'js/dm-post-polish.js', [], DMHR_VERSION, true);
             wp_script_add_data('dm-post-polish', 'defer', true);
+            wp_localize_script('dm-post-polish', 'DMPostPolishData', [
+                'urls' => DM_Utils::get_urls(),
+            ]);
         }
     }
 }

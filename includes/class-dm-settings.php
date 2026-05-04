@@ -33,6 +33,15 @@ class DM_Settings {
                 'default'           => false,
             ]
         );
+        register_setting(
+            'dmhr_settings_group',
+            'dmhr_enable_soul_quiz',
+            [
+                'type'              => 'boolean',
+                'sanitize_callback' => [$this, 'sanitize_checkbox'],
+                'default'           => false,
+            ]
+        );
     }
 
     public function sanitize_checkbox(mixed $value): bool {
@@ -57,6 +66,7 @@ class DM_Settings {
                 settings_fields('dmhr_settings_group');
                 do_settings_sections('dmhr_settings_group');
                 $enabled = (bool) get_option(self::OPTION_NAME, false);
+                $quiz_enabled = (bool) get_option('dmhr_enable_soul_quiz', false);
                 ?>
                 <table class="form-table">
                     <tr>
@@ -78,6 +88,28 @@ class DM_Settings {
                             </label>
                             <p class="description">
                                 <?php esc_html_e('Experimental. Turn off instantly if posts show layout issues.', 'divine-homepage-redesign'); ?>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="dmhr_enable_soul_quiz">
+                                <?php esc_html_e('Enable Mid-Article Soul Signal Quiz', 'divine-homepage-redesign'); ?>
+                            </label>
+                        </th>
+                        <td>
+                            <label for="dmhr_enable_soul_quiz">
+                                <input
+                                    type="checkbox"
+                                    id="dmhr_enable_soul_quiz"
+                                    name="dmhr_enable_soul_quiz"
+                                    value="1"
+                                    <?php checked($quiz_enabled, true); ?>
+                                />
+                                <?php esc_html_e('Adds an interactive quiz card inside polished single posts', 'divine-homepage-redesign'); ?>
+                            </label>
+                            <p class="description">
+                                <?php esc_html_e('Experimental. Turn off if it causes layout issues.', 'divine-homepage-redesign'); ?>
                             </p>
                         </td>
                     </tr>

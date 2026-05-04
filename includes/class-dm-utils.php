@@ -70,6 +70,10 @@ class DM_Utils {
         return (bool) get_option('dmhr_enable_post_polish', false);
     }
 
+    public static function soul_quiz_enabled(): bool {
+        return (bool) get_option('dmhr_enable_soul_quiz', false);
+    }
+
     public static function render_primary_navigation(array $urls): string {
         $menu_html = '';
         $menu_id = 0;
