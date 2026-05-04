@@ -349,7 +349,7 @@ class DM_Post_Polish {
 
         $card = '<!-- DM Soul Quiz inserted -->' . $this->get_soul_quiz_card_html($post_id);
 
-        // Primary: WP_HTML_Tag_Processor for DOM-safe insertion after 3rd top-level H2
+        // Primary: WP_HTML_Tag_Processor for DOM-safe insertion before 2nd safe H2
         if (class_exists('WP_HTML_Tag_Processor')) {
             $result = $this->inject_soul_quiz_card_tag_processor($content, $card);
             if ($result !== null) {
@@ -394,7 +394,8 @@ class DM_Post_Polish {
                 }
                 if ($tag === 'h2' && $forbidden_depth === 0 && $depth <= 3) {
                     $h2_count++;
-                    if ($h2_count === 3) {
+                    // Target 2nd safe H2; if only 1 exists, target that one instead
+                    if ($h2_count === 2 || ($h2_count === 1 && !$processor->next_tag())) {
                         $processor->set_attribute('data-dm-insert', $marker);
                         break;
                     }
@@ -407,45 +408,49 @@ class DM_Post_Polish {
             }
         }
 
-        if ($h2_count < 3) {
+        if ($h2_count === 0) {
             return null;
         }
 
         $modified = $processor->get_updated_html();
         $pattern = '/(<h2\b[^>]*\bdata-dm-insert="' . preg_quote($marker, '/') . '"[^>]*>.*?<\/h2>)/is';
-        $modified = preg_replace($pattern, '$0' . $card, $modified, 1);
+        $modified = preg_replace($pattern, $card . '$0', $modified, 1);
         $modified = preg_replace('/\s*data-dm-insert="' . preg_quote($marker, '/') . '"/i', '', $modified);
 
         return $modified;
     }
 
     private function inject_soul_quiz_card_fallback(string $content, string $card): string {
-        $parts = preg_split('/(<\/h2>)/i', $content, -1, PREG_SPLIT_DELIM_CAPTURE);
-        if ($parts === false || count($parts) < 3) {
+        if (!preg_match_all('/<h2\b[^>]*>.*?<\/h2>/is', $content, $matches, PREG_OFFSET_CAPTURE)) {
             return $this->append_soul_quiz_card_after_paragraphs($content, $card);
         }
 
-        $safe_indices = [];
-        for ($i = 1; $i < count($parts); $i += 2) {
-            $after = substr($parts[$i + 1] ?? '', 0, 400);
-            $after_trim = ltrim($after);
-            // Skip if next significant markup is a closing container tag (H2 was inside a wrapper)
-            if (preg_match('/^<\/(div|section|article|aside|td|th|li|blockquote|figure)/i', $after_trim)) {
+        $safe_matches = [];
+        foreach ($matches[0] as $match) {
+            $offset = $match[1];
+            $html = $match[0];
+            // Skip if this H2 is inside a narrow/wrapped context by looking backward
+            $before = substr($content, max(0, $offset - 600), min(600, $offset));
+            // Reject if preceded by a forbidden opening container very close before
+            if (preg_match('/<(div|section|article|aside|figure|blockquote|td|th|li)\b[^>]*\bclass="[^"]*(?:key-takeaway|takeaway|ccc|callout|table|box|card|dm-post-inline-tool-cta|dm-soul-quiz-card|dm-post-continue|dm-post-related|dm-key-takeaway-box)[^"]*"[^>]*>[^<]*$/is', $before)) {
                 continue;
             }
-            $safe_indices[] = $i;
-            if (count($safe_indices) >= 3) {
-                break;
+            // Reject if the H2 itself contains a forbidden class
+            if (preg_match('/<h2\b[^>]*\bclass="[^"]*(?:key-takeaway|takeaway|ccc|callout|table|box|card|dm-post-inline-tool-cta|dm-soul-quiz-card|dm-post-continue|dm-post-related|dm-key-takeaway-box)[^"]*"/is', $html)) {
+                continue;
             }
+            $safe_matches[] = $match;
         }
 
-        if (!empty($safe_indices)) {
-            $target = end($safe_indices);
-            array_splice($parts, $target + 1, 0, [$card]);
-            return implode('', $parts);
+        if (empty($safe_matches)) {
+            return $this->append_soul_quiz_card_after_paragraphs($content, $card);
         }
 
-        return $this->append_soul_quiz_card_after_paragraphs($content, $card);
+        // Prefer 2nd safe H2, otherwise 1st
+        $target = $safe_matches[1] ?? $safe_matches[0];
+        $offset = $target[1];
+
+        return substr($content, 0, $offset) . $card . substr($content, $offset);
     }
 
     private function append_soul_quiz_card_after_paragraphs(string $content, string $card): string {
