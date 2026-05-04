@@ -111,7 +111,7 @@ class DM_Post_Polish {
         $categories = wp_get_post_categories($post_id);
         $args = [
             'post_type' => 'post',
-            'posts_per_page' => 4,
+            'posts_per_page' => 5,
             'post__not_in' => [$post_id],
             'ignore_sticky_posts' => true,
             'no_found_rows' => true,

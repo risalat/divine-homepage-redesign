@@ -326,6 +326,7 @@ body.dm-single-post-polish .dm-post-sidebar-source {
 .dm-post-section-head p { margin: 0 0 8px; color: #9b7300; text-transform: uppercase; letter-spacing: .14em; font-size: 12px; font-weight: 950; }
 
 .dm-post-related-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.dm-post-related-card:last-child:nth-child(even) { grid-column: 1 / -1; }
 .dm-post-related-card {
   display: block;
   overflow: hidden;
