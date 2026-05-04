@@ -477,6 +477,20 @@ body.dm-single-post-polish .dm-soul-quiz-card {
     0 26px 80px rgba(75,0,130,.18),
     0 2px 0 rgba(255,255,255,.7) inset;
   isolation: isolate;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  grid-column: 1 / -1;
+  clear: both;
+}
+
+body.dm-single-post-polish .dm-post-inline-tool-cta .dm-soul-quiz-card,
+body.dm-single-post-polish .dm-key-takeaway-box .dm-soul-quiz-card,
+body.dm-single-post-polish table .dm-soul-quiz-card,
+body.dm-single-post-polish figure .dm-soul-quiz-card {
+  display: block;
+  width: 100% !important;
+  margin: 24px 0;
 }
 
 body.dm-single-post-polish .dm-soul-quiz-card__inner {

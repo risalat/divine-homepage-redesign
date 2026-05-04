@@ -164,6 +164,18 @@ class DM_Post_Polish {
             return $content;
         }
 
+        // Protect quiz card from paragraph splitting
+        $quiz_card = '';
+        $content = preg_replace_callback(
+            '/(<section class="dm-soul-quiz-card[^>]*>.*?<\/section>)/is',
+            function ($m) use (&$quiz_card) {
+                $quiz_card = $m[0];
+                return '<!--DM_QUIZ_PROTECT-->';
+            },
+            $content,
+            1
+        );
+
         $paragraphs = explode('</p>', $content);
         $count = count($paragraphs);
 
@@ -172,10 +184,18 @@ class DM_Post_Polish {
         } elseif ($count > 3) {
             array_splice($paragraphs, 3, 0, [$cta]);
         } else {
-            return $content . $cta;
+            $result = $content . $cta;
+            if ($quiz_card !== '') {
+                $result = str_replace('<!--DM_QUIZ_PROTECT-->', $quiz_card, $result);
+            }
+            return $result;
         }
 
-        return implode('</p>', $paragraphs);
+        $result = implode('</p>', $paragraphs);
+        if ($quiz_card !== '') {
+            $result = str_replace('<!--DM_QUIZ_PROTECT-->', $quiz_card, $result);
+        }
+        return $result;
     }
 
     private function get_post_sidebar_html(): string {
@@ -327,18 +347,108 @@ class DM_Post_Polish {
             return $content;
         }
 
-        $card = $this->get_soul_quiz_card_html($post_id);
+        $card = '<!-- DM Soul Quiz inserted -->' . $this->get_soul_quiz_card_html($post_id);
 
-        $h2s = preg_split('/(<\/h2>)/i', $content, -1, PREG_SPLIT_DELIM_CAPTURE);
-        if (count($h2s) >= 7) {
-            array_splice($h2s, 6, 0, [$card]);
-            return implode('', $h2s);
-        }
-        if (count($h2s) >= 5) {
-            array_splice($h2s, 4, 0, [$card]);
-            return implode('', $h2s);
+        // Primary: WP_HTML_Tag_Processor for DOM-safe insertion after 3rd top-level H2
+        if (class_exists('WP_HTML_Tag_Processor')) {
+            $result = $this->inject_soul_quiz_card_tag_processor($content, $card);
+            if ($result !== null) {
+                return $result;
+            }
         }
 
+        // Fallback: safer regex-based insertion
+        return $this->inject_soul_quiz_card_fallback($content, $card);
+    }
+
+    private function inject_soul_quiz_card_tag_processor(string $content, string $card): ?string {
+        $processor = new WP_HTML_Tag_Processor($content);
+        $depth = 0;
+        $forbidden_depth = 0;
+        $h2_count = 0;
+        $marker = 'dm-soul-quiz-insert-' . wp_rand(100000, 999999);
+
+        $forbidden_classes = [
+            'key-takeaway', 'takeaway', 'ccc', 'callout', 'table', 'box', 'card',
+            'dm-post-inline-tool-cta', 'dm-soul-quiz-card', 'dm-post-continue',
+            'dm-post-related', 'dm-key-takeaway-box',
+        ];
+
+        while ($processor->next_tag()) {
+            $tag = strtolower($processor->get_tag());
+            $is_closer = $processor->is_tag_closer();
+
+            if (!$is_closer) {
+                $depth++;
+                if (in_array($tag, ['table', 'ul', 'ol', 'blockquote', 'figure'], true)) {
+                    $forbidden_depth = $depth;
+                }
+                if ($tag === 'div') {
+                    $class = strtolower((string) $processor->get_attribute('class'));
+                    foreach ($forbidden_classes as $f) {
+                        if (strpos($class, $f) !== false) {
+                            $forbidden_depth = $depth;
+                            break;
+                        }
+                    }
+                }
+                if ($tag === 'h2' && $forbidden_depth === 0 && $depth <= 3) {
+                    $h2_count++;
+                    if ($h2_count === 3) {
+                        $processor->set_attribute('data-dm-insert', $marker);
+                        break;
+                    }
+                }
+            } else {
+                if ($forbidden_depth > 0 && $depth === $forbidden_depth) {
+                    $forbidden_depth = 0;
+                }
+                $depth--;
+            }
+        }
+
+        if ($h2_count < 3) {
+            return null;
+        }
+
+        $modified = $processor->get_updated_html();
+        $pattern = '/(<h2\b[^>]*\bdata-dm-insert="' . preg_quote($marker, '/') . '"[^>]*>.*?<\/h2>)/is';
+        $modified = preg_replace($pattern, '$0' . $card, $modified, 1);
+        $modified = preg_replace('/\s*data-dm-insert="' . preg_quote($marker, '/') . '"/i', '', $modified);
+
+        return $modified;
+    }
+
+    private function inject_soul_quiz_card_fallback(string $content, string $card): string {
+        $parts = preg_split('/(<\/h2>)/i', $content, -1, PREG_SPLIT_DELIM_CAPTURE);
+        if ($parts === false || count($parts) < 3) {
+            return $this->append_soul_quiz_card_after_paragraphs($content, $card);
+        }
+
+        $safe_indices = [];
+        for ($i = 1; $i < count($parts); $i += 2) {
+            $after = substr($parts[$i + 1] ?? '', 0, 400);
+            $after_trim = ltrim($after);
+            // Skip if next significant markup is a closing container tag (H2 was inside a wrapper)
+            if (preg_match('/^<\/(div|section|article|aside|td|th|li|blockquote|figure)/i', $after_trim)) {
+                continue;
+            }
+            $safe_indices[] = $i;
+            if (count($safe_indices) >= 3) {
+                break;
+            }
+        }
+
+        if (!empty($safe_indices)) {
+            $target = end($safe_indices);
+            array_splice($parts, $target + 1, 0, [$card]);
+            return implode('', $parts);
+        }
+
+        return $this->append_soul_quiz_card_after_paragraphs($content, $card);
+    }
+
+    private function append_soul_quiz_card_after_paragraphs(string $content, string $card): string {
         $paragraphs = explode('</p>', $content);
         $count = count($paragraphs);
         if ($count > 6) {
@@ -362,8 +472,8 @@ class DM_Post_Polish {
         $urls = DM_Utils::get_urls();
         $post_id = get_the_ID();
 
-        $content_with_inline_cta = $this->inject_inline_tool_cta($content, (int) $post_id);
-        $content_with_quiz = $this->inject_soul_quiz_card($content_with_inline_cta, (int) $post_id);
+        $content_with_quiz = $this->inject_soul_quiz_card($content, (int) $post_id);
+        $content_with_inline_cta = $this->inject_inline_tool_cta($content_with_quiz, (int) $post_id);
 
         $continue = '<section class="dm-post-continue" aria-labelledby="dm-post-continue-title">'
             . '<div><p class="dm-post-side-kicker">Your reading does not have to end here</p>'
