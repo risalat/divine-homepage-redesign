@@ -72,6 +72,112 @@ class DM_Post_Polish {
         <?php
     }
 
+    private function get_inline_tool_cta_html(int $post_id): string {
+        $urls = DM_Utils::get_urls();
+        $categories = get_the_category($post_id);
+        $category_slugs = [];
+        foreach ($categories as $cat) {
+            if ($cat instanceof WP_Term) {
+                $category_slugs[] = $cat->slug;
+            }
+        }
+        $title = strtolower((string) get_the_title($post_id));
+        $content_snippet = strtolower(wp_strip_all_tags((string) get_post_field('post_content', $post_id)));
+        $context = implode(' ', $category_slugs) . ' ' . $title . ' ' . $content_snippet;
+
+        $tool = [
+            'url' => $urls['tarot_card'],
+            'icon' => '☼',
+            'kicker' => 'Try a free spiritual tool',
+            'title' => 'Pull a card before you continue',
+            'text' => 'Get a quick daily reading and keep the insight flowing.',
+            'button' => 'Reveal today’s card',
+        ];
+
+        if (str_contains($context, 'tarot')) {
+            $tool = [
+                'url' => $urls['tarot_card'],
+                'icon' => '☼',
+                'kicker' => 'Try a free tarot tool',
+                'title' => 'Pull your card for today',
+                'text' => 'Get a quick daily tarot reading before you continue exploring the meaning.',
+                'button' => 'Reveal today’s card',
+            ];
+        } elseif (
+            str_contains($context, 'zodiac')
+            || str_contains($context, 'horoscope')
+            || str_contains($context, 'astrology')
+            || str_contains($context, 'birth sign')
+        ) {
+            $tool = [
+                'url' => $urls['daily_horoscope'],
+                'icon' => '☾',
+                'kicker' => 'Try a free zodiac tool',
+                'title' => 'Read today’s message for your sign',
+                'text' => 'Get a fresh zodiac forecast for timing, relationships, and reflection.',
+                'button' => 'Read today’s horoscope',
+            ];
+        } elseif (
+            str_contains($context, 'numerology')
+            || str_contains($context, 'angel number')
+            || str_contains($context, 'life path')
+            || str_contains($context, ' number ')
+        ) {
+            $tool = [
+                'url' => $urls['life_path'],
+                'icon' => '7',
+                'kicker' => 'Try a free numerology tool',
+                'title' => 'Find the number behind your birthday',
+                'text' => 'Use your birthdate to reveal your life path number and its meaning.',
+                'button' => 'Calculate my life path',
+            ];
+        } elseif (
+            str_contains($context, 'dream')
+            || str_contains($context, 'relationship')
+            || str_contains($context, 'love')
+            || str_contains($context, 'compatibility')
+        ) {
+            $tool = [
+                'url' => $urls['zodiac_compatibility'],
+                'icon' => '♡',
+                'kicker' => 'Try a free compatibility tool',
+                'title' => 'Check your zodiac compatibility',
+                'text' => 'Compare two signs and see where the connection feels easy, intense, or surprising.',
+                'button' => 'Check compatibility',
+            ];
+        }
+
+        return '<section class="dm-post-inline-tool-cta" aria-label="Try a related tool">'
+            . '<div class="dm-post-inline-tool-cta__icon">' . esc_html($tool['icon']) . '</div>'
+            . '<div class="dm-post-inline-tool-cta__copy">'
+            . '<p class="dm-post-side-kicker">' . esc_html($tool['kicker']) . '</p>'
+            . '<h2>' . esc_html($tool['title']) . '</h2>'
+            . '<p>' . esc_html($tool['text']) . '</p>'
+            . '</div>'
+            . '<a class="dm-post-inline-tool-cta__button" href="' . esc_url($tool['url']) . '">' . esc_html($tool['button']) . '</a>'
+            . '</section>';
+    }
+
+    private function inject_inline_tool_cta(string $content, int $post_id): string {
+        $cta = $this->get_inline_tool_cta_html($post_id);
+        if (strpos($content, 'dm-post-inline-tool-cta') !== false) {
+            return $content;
+        }
+
+        $paragraphs = explode('</p>', $content);
+        $count = count($paragraphs);
+
+        if ($count > 5) {
+            array_splice($paragraphs, 5, 0, [$cta]);
+        } elseif ($count > 3) {
+            array_splice($paragraphs, 3, 0, [$cta]);
+        } else {
+            return $content . $cta;
+        }
+
+        return implode('</p>', $paragraphs);
+    }
+
     private function get_post_sidebar_html(): string {
         $urls = DM_Utils::get_urls();
         ob_start();
@@ -168,6 +274,8 @@ class DM_Post_Polish {
         $urls = DM_Utils::get_urls();
         $post_id = get_the_ID();
 
+        $content_with_inline_cta = $this->inject_inline_tool_cta($content, (int) $post_id);
+
         $continue = '<section class="dm-post-continue" aria-labelledby="dm-post-continue-title">'
             . '<div><p class="dm-post-side-kicker">Your reading does not have to end here</p>'
             . '<h2 id="dm-post-continue-title">Keep exploring your path</h2>'
@@ -179,7 +287,7 @@ class DM_Post_Polish {
             . '<a href="' . esc_url($urls['daily_horoscope']) . '"><span>☾</span><strong>Daily Horoscope</strong><em>Read today’s zodiac forecast.</em></a>'
             . '</div></section>';
 
-        $main_content = $content . $continue . $this->get_related_posts_html((int) $post_id);
+        $main_content = $content_with_inline_cta . $continue . $this->get_related_posts_html((int) $post_id);
         $enhanced_content = '<div class="dm-post-reading-shell">'
             . '<div class="dm-post-reading-main">' . $main_content . '</div>'
             . $this->get_post_sidebar_html()

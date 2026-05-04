@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Divine Markings Homepage Redesign
  * Description: A custom shortcode-based homepage redesign for DivineMarkings.com.
- * Version: 1.5.8
+ * Version: 1.5.9
  * Author: Divine Markings
  * License: GPL-2.0-or-later
  */
@@ -15,7 +15,7 @@ if (!defined('DMHR_ENABLE_POST_POLISH')) {
     define('DMHR_ENABLE_POST_POLISH', false);
 }
 
-define('DMHR_VERSION', '1.5.8');
+define('DMHR_VERSION', '1.5.9');
 define('DMHR_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('DMHR_PLUGIN_URL', plugin_dir_url(__FILE__));
 
