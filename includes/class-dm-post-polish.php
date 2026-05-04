@@ -491,7 +491,7 @@ class DM_Post_Polish {
             . '<a href="' . esc_url($urls['daily_horoscope']) . '"><span>☾</span><strong>Daily Horoscope</strong><em>Read today’s zodiac forecast.</em></a>'
             . '</div></section>';
 
-        $main_content = $content_with_quiz . $continue . $this->get_related_posts_html((int) $post_id);
+        $main_content = $content_with_inline_cta . $continue . $this->get_related_posts_html((int) $post_id);
         $enhanced_content = '<div class="dm-post-reading-shell">'
             . '<div class="dm-post-reading-main">' . $main_content . '</div>'
             . $this->get_post_sidebar_html()
