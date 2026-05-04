@@ -67,39 +67,49 @@ body.dm-single-post-polish .entry-content th { padding: 14px 16px; border-color:
 body.dm-single-post-polish .dm-key-takeaway-box { background: linear-gradient(135deg, #fff8e4, #fffaf4); border: 1px solid rgba(215,183,64,.55); border-radius: 18px; padding: 22px 24px; box-shadow: 0 14px 34px rgba(75,0,130,.07); }
 body.dm-single-post-polish .dm-key-takeaway-box strong:first-child { color: #4B0082; }
 
-/* Text overflow prevention */
+/* Reading column containment */
 body.dm-single-post-polish .dm-post-reading-main {
-  width: 100%;
-  max-width: 820px;
-  min-width: 0;
-  overflow: hidden;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 820px !important;
+  min-width: 0 !important;
+  overflow-x: clip !important;
+  background: #fff !important;
+  padding: clamp(26px, 3vw, 42px) !important;
 }
 
-body.dm-single-post-polish .dm-post-reading-main > *,
-body.dm-single-post-polish .dm-post-reading-main .entry-content > *,
-body.dm-single-post-polish .dm-post-reading-main p,
+body.dm-single-post-polish .dm-post-reading-main .alignwide,
+body.dm-single-post-polish .dm-post-reading-main .alignfull,
+body.dm-single-post-polish .dm-post-reading-main [class*="wp-block-"],
+body.dm-single-post-polish .dm-post-reading-main .wp-block-group,
+body.dm-single-post-polish .dm-post-reading-main .wp-block-image,
+body.dm-single-post-polish .dm-post-reading-main .wp-block-table,
+body.dm-single-post-polish .dm-post-reading-main .kb-row-layout-wrap,
+body.dm-single-post-polish .dm-post-reading-main .kt-row-column-wrap {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
 body.dm-single-post-polish .dm-post-reading-main h1,
 body.dm-single-post-polish .dm-post-reading-main h2,
 body.dm-single-post-polish .dm-post-reading-main h3,
 body.dm-single-post-polish .dm-post-reading-main h4,
-body.dm-single-post-polish .dm-post-reading-main ul,
-body.dm-single-post-polish .dm-post-reading-main ol,
-body.dm-single-post-polish .dm-post-reading-main li,
-body.dm-single-post-polish .dm-post-reading-main blockquote {
-  max-width: 100%;
-  overflow-wrap: anywhere;
-  word-break: normal;
-}
-
-body.dm-single-post-polish .dm-post-reading-main img,
-body.dm-single-post-polish .dm-post-reading-main iframe,
-body.dm-single-post-polish .dm-post-reading-main table {
-  max-width: 100%;
+body.dm-single-post-polish .dm-post-reading-main p,
+body.dm-single-post-polish .dm-post-reading-main li {
+  max-width: 100% !important;
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
 }
 
 body.dm-single-post-polish .dm-post-reading-main table {
-  display: block;
-  overflow-x: auto;
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block !important;
+  overflow-x: auto !important;
 }
 
 /* === Post hero === */
