@@ -2276,8 +2276,30 @@ body.dm-homepage-custom .dm-home .dm-top-strip__inner {
     max-height: 46px !important;
   }
 
+  body.dm-homepage-custom .dm-home .dm-header-actions {
+    display: none !important;
+  }
+
+  body.dm-homepage-custom .dm-home .dm-primary-nav {
+    display: none !important;
+  }
+
+  body.dm-homepage-custom .dm-home.dm-nav-open .dm-primary-nav {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+  }
+
   body.dm-homepage-custom .dm-home .dm-primary-nav__list {
-    display: block !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+  }
+
+  body.dm-homepage-custom .dm-home .dm-primary-nav a {
+    padding: 13px 12px !important;
+    white-space: normal !important;
   }
 }
 
